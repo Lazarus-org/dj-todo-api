@@ -1,0 +1,300 @@
+<!-- templates/todos/todo_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <!-- GSAP Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+    <style>
+        /* Modern Color Palette */
+        :root {
+            --primary-color: #6C63FF; /* Purple */
+            --secondary-color: #FF6584; /* Pink */
+            --accent-color: #00BFA6; /* Teal */
+            --background-light: #F5F5F5; /* Light Gray */
+            --background-dark: #1E1E1E; /* Dark Gray */
+            --text-light: #333333; /* Dark Gray */
+            --text-dark: #FFFFFF; /* White */
+            --card-light: #FFFFFF; /* White */
+            --card-dark: #2D2D2D; /* Dark Gray */
+            --priority-low: #00C853; /* Green */
+            --priority-medium: #FFC107; /* Amber */
+            --priority-high: #D32F2F; /* Red */
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-light);
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        body.dark-mode {
+            background-color: var(--background-dark);
+            color: var(--text-dark);
+        }
+
+        .todo-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: var(--card-light);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            transition: background-color 0.5s ease;
+        }
+
+        .dark-mode .todo-container {
+            background-color: var(--card-dark);
+        }
+
+        .todo-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-left: 5px solid var(--primary-color);
+            background-color: var(--card-light);
+            border-radius: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.5s ease;
+            cursor: pointer;
+        }
+
+        .dark-mode .todo-item {
+            background-color: var(--card-dark);
+        }
+
+        .todo-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .todo-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .todo-description {
+            font-size: 1em;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .dark-mode .todo-description {
+            color: var(--text-dark);
+        }
+
+        .todo-due-date {
+            font-size: 0.9em;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .todo-priority {
+            font-size: 0.9em;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .priority-low {
+            background-color: var(--priority-low);
+        }
+
+        .priority-medium {
+            background-color: var(--priority-medium);
+        }
+
+        .priority-high {
+            background-color: var(--priority-high);
+        }
+
+        .assigned-users {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .user-item {
+            padding: 5px 10px;
+            background-color: var(--secondary-color);
+            color: #fff;
+            border-radius: 4px;
+            font-size: 0.9em;
+            transition: transform 0.2s ease;
+        }
+
+        .user-item:hover {
+            transform: scale(1.1);
+        }
+
+        .user-role {
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .collapse-button {
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .collapse-button:hover {
+            background-color: var(--accent-color);
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+
+        /* Dark Mode Toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .dark-mode-toggle:hover {
+            background-color: var(--accent-color);
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-button {
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .filter-button:hover {
+            background-color: var(--accent-color);
+        }
+
+        .filter-button.active {
+            background-color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+
+    <div class="todo-container">
+        <h1 style="text-align: center; color: var(--primary-color);">Todo List</h1>
+
+        <!-- Filters -->
+        <div class="filters">
+            <button class="filter-button active" data-filter="all">All</button>
+            <button class="filter-button" data-filter="low">Low Priority</button>
+            <button class="filter-button" data-filter="medium">Medium Priority</button>
+            <button class="filter-button" data-filter="high">High Priority</button>
+        </div>
+
+        <!-- Todo Items -->
+        {% for todo in todos %}
+            <div class="todo-item" data-todo-id="{{ todo.id }}" data-priority="{{ todo.priority }}">
+                <div class="todo-title">{{ todo.title }}</div>
+                <div class="todo-description">{{ todo.description }}</div>
+                <div class="todo-due-date">Due Date: {{ todo.due_date|default:"No due date" }}</div>
+                <div class="todo-priority priority-{{ todo.priority }}">{{ todo.get_priority_display }}</div>
+                <button class="collapse-button" onclick="toggleCollapse('{{ todo.id }}')">Show Assigned Users</button>
+                <div class="collapsible-content" id="content-{{ todo.id }}">
+                    <div class="assigned-users">
+                        {% for assignment in todo.todouserassignment_set.all %}
+                            <div class="user-item">
+                                {{ assignment.user.username }} <span class="user-role">({{ assignment.get_role_display }})</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // GSAP Animations
+        gsap.from(".todo-item", {
+            opacity: 0,
+            y: 50,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: "power2.out",
+        });
+
+        // Collapse Functionality
+        function toggleCollapse(todoId) {
+            const content = document.getElementById(`content-${todoId}`);
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+            }
+        }
+
+        // Hover Effects with GSAP
+        document.querySelectorAll('.todo-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                gsap.to(item, { scale: 1.02, duration: 0.3 });
+            });
+            item.addEventListener('mouseleave', () => {
+                gsap.to(item, { scale: 1, duration: 0.3 });
+            });
+        });
+
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const toggleButton = document.querySelector('.dark-mode-toggle');
+            toggleButton.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
+        }
+
+        // Filter Functionality
+        document.querySelectorAll('.filter-button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.filter-button').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                const filter = button.getAttribute('data-filter');
+                document.querySelectorAll('.todo-item').forEach(item => {
+                    const priority = item.getAttribute('data-priority');
+                    if (filter === 'all' || filter === priority) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
